@@ -1,12 +1,24 @@
 # health-fix
 
-Android の Health Connect に、歩数を自動で書き込むアプリです（開発中）。
+Android アプリ。設定した歩数を Health Connect に記録し、端末内で履歴を管理します。
 
-- 設定した最小〜最大の範囲で1日の歩数をランダムに決め、設定した時間帯に分けて書き込みます。
-- 書き込んだデータは、履歴の確認・修正・削除ができます。
+## APK を入手する
 
-詳しい仕様は [SPEC.md](SPEC.md) を参照してください。
+GitHub Actions が APK をビルドします。GitHub リポジトリの **Actions → Android APK** から最新実行を開き、`health-fix-...` artifact をダウンロードしてください。`v*` タグを作成すると GitHub Releases に APK を公開します。
 
-## ステータス
+## ビルド
 
-仕様検討中です（実装前）。デプロイは仕様が確定してから行います。
+```sh
+gradle assembleDebug
+```
+
+仕様書: [SPEC.md](SPEC.md)
+
+## 現在の実装範囲
+
+- Health Connect の歩数読み書き権限
+- 指定範囲からの歩数生成、時間帯ごとの分配、手動書き込み
+- 履歴とアプリ内設定の保存
+- 任意の過去日への作成、日付重複のスキップ
+
+自動実行、曜日選択、補完、記録の編集・削除、Health Connect 上の履歴照合は未実装です。
