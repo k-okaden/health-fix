@@ -1,6 +1,6 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") }
 
-android { namespace = "jp.healthfix"; compileSdk = 35
+android { namespace = "jp.healthfix"; compileSdk = 36
     defaultConfig { applicationId = "jp.healthfix"; minSdk = 28; targetSdk = 35; versionCode = 1; versionName = "0.2.0" }
     buildFeatures { compose = true }
 }
