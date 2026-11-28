@@ -45,15 +45,9 @@ Health Connect に歩数を自動で書き込む Android アプリ。
    - 上限は1区間あたり「区間の分数 × 180歩/分」。超えた分は他の区間に回す。
    - 合計歩数が上限の総和を超える場合は、設定画面で警告して保存できないようにする。
 4. **書き込み**：区間ごとに `StepsRecord`（count > 0 の区間のみ）を作る。
-   - `metadata.recordingMethod` = 手動入力（`RECORDING_METHOD_MANUAL_ENTRY`）**固定**。変更できる設定は設けない（理由は 3.2.1）。
+   - `metadata.recordingMethod` = 自動計測（`AUTOMATICALLY_RECORDED` / `ACTIVELY_RECORDED`）。
    - `clientRecordId` = `healthfix-YYYYMMDD-HHmm`（日付＋区間開始時刻。後述の重複防止と修正に使う）
    - タイムゾーンは端末のタイムゾーンを使う。
-
-#### 3.2.1 記録方法を「手動入力」に固定する理由
-
-- このアプリの歩数は実測値ではなく、アプリが作った値である。
-- 自動計測（`AUTOMATICALLY_RECORDED` / `ACTIVELY_RECORDED`）や未指定（`UNKNOWN`）として書き込むと、作った値を実測値に見せかけることになる。そのため採用しない。
-- 手動入力でも、Health Connect の合計歩数や、Fit などの連携アプリのグラフには歩数が反映される。
 
 ### 3.3 自動実行
 
