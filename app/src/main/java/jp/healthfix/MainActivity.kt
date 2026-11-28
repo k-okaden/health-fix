@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
         val out=MutableList(chunks.size){0L}; var remaining=total
         val active=chunks.indices.filter { Random.nextFloat()>=0.2f }.ifEmpty { listOf(Random.nextInt(chunks.size)) }.toMutableList()
         while(remaining>0 && active.isNotEmpty()) { val weights=active.map { Random.nextDouble(0.2,1.0) }; val sum=weights.sum(); var used=0
-            active.toList().forEachIndexed { ix, idx -> val amount=if(ix==active.lastIndex) remaining-used else (remaining*weights[ix]/sum).toInt().coerceAtLeast(1); val n=minOf(amount.toLong(),capacities[idx].toLong()-out[idx]); if(n>0){out[idx]+=n;used+=n} }
+            active.toList().forEachIndexed { ix, idx -> val amount=if(ix==active.lastIndex) remaining-used else (remaining*weights[ix]/sum).toInt().coerceAtLeast(1); val n=minOf(amount.toLong(),capacities[idx].toLong()-out[idx]); if(n>0){out[idx]+=n;used+=n.toInt()} }
             remaining-=used; active.removeAll { out[it]>=capacities[it] }; if(used==0 && active.isNotEmpty()) { val i=active.first(); out[i]++; remaining--; if(out[i]>=capacities[i]) active.remove(i) }
         }
         if(remaining>0) { message="この設定では上限を超えています" }
