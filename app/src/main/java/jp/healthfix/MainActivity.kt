@@ -3,7 +3,6 @@ package jp.healthfix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.metadata.Metadata
-import androidx.health.connect.client.request.InsertRecordsRequest
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -43,14 +42,14 @@ class MainActivity : ComponentActivity() {
     private var endText by mutableStateOf("20:00")
     private var interval by mutableIntStateOf(15)
     private var autoRun by mutableStateOf(false)
-    private val permissionLauncher = registerForActivityResult(HealthConnectClient.getPermissionController(this).createRequestPermissionResultContract()) { result -> granted = result.containsAll(permissions); message = if (granted) "Health Connect の権限を許可しました" else "歩数の読み書き権限が必要です" }
+    private val permissionLauncher = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { result -> granted = result.containsAll(permissions); message = if (granted) "Health Connect の権限を許可しました" else "歩数の読み書き権限が必要です" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         history = loadHistory()
         val sdk = HealthConnectClient.getSdkStatus(this)
         if (sdk == HealthConnectClient.SDK_AVAILABLE) { client = HealthConnectClient.getOrCreate(this); lifecycleScope.launch { granted = client!!.permissionController.getGrantedPermissions().containsAll(permissions) } }
-        setContent { MaterialTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF176B5B), secondary = androidx.compose.ui.graphics.Color(0xFF83B8A6))) { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { Column(Modifier.fillMaxSize().padding(20.dp)) { Text("health-fix", style = MaterialTheme.typography.headlineMedium); Text("歩数データを自分で管理", style = MaterialTheme.typography.bodyMedium); Spacer(Modifier.height(18.dp)); TabRow(selectedTabIndex = tab) { Tab(tab == 0, { tab = 0 }, text = { Text("ホーム") }); Tab(tab == 1, { tab = 1 }, text = { Text("履歴") }); Tab(tab == 2, { tab = 2 }, text = { Text("設定") }) }; Spacer(Modifier.height(16.dp)); when(tab) { 0 -> HomeScreen(); 1 -> HistoryScreen(); else -> SettingsScreen() } } } } } }
+        setContent { MaterialTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF176B5B), secondary = androidx.compose.ui.graphics.Color(0xFF83B8A6))) { Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { Column(Modifier.fillMaxSize().padding(20.dp)) { Text("health-fix", style = MaterialTheme.typography.headlineMedium); Text("歩数データを自分で管理", style = MaterialTheme.typography.bodyMedium); Spacer(Modifier.height(18.dp)); TabRow(selectedTabIndex = tab) { Tab(tab == 0, { tab = 0 }, text = { Text("ホーム") }); Tab(tab == 1, { tab = 1 }, text = { Text("履歴") }); Tab(tab == 2, { tab = 2 }, text = { Text("設定") }) }; Spacer(Modifier.height(16.dp)); when(tab) { 0 -> HomeScreen(); 1 -> HistoryScreen(); else -> SettingsScreen() } } } } }
     }
 
     @Composable private fun HomeScreen() {
@@ -106,7 +105,7 @@ class MainActivity : ComponentActivity() {
         val out=MutableList(chunks.size){0L}; var remaining=total
         val active=chunks.indices.filter { Random.nextFloat()>=0.2f }.ifEmpty { listOf(Random.nextInt(chunks.size)) }.toMutableList()
         while(remaining>0 && active.isNotEmpty()) { val weights=active.map { Random.nextDouble(0.2,1.0) }; val sum=weights.sum(); var used=0
-            active.toList().forEachIndexed { ix, idx -> val amount=if(ix==active.lastIndex) remaining-used else (remaining*weights[ix]/sum).toInt().coerceAtLeast(1); val n=minOf(amount,capacities[idx]-out[idx]); if(n>0){out[idx]+=n;used+=n} }
+            active.toList().forEachIndexed { ix, idx -> val amount=if(ix==active.lastIndex) remaining-used else (remaining*weights[ix]/sum).toInt().coerceAtLeast(1); val n=minOf(amount.toLong(),capacities[idx].toLong()-out[idx]); if(n>0){out[idx]+=n;used+=n} }
             remaining-=used; active.removeAll { out[it]>=capacities[it] }; if(used==0 && active.isNotEmpty()) { val i=active.first(); out[i]++; remaining--; if(out[i]>=capacities[i]) active.remove(i) }
         }
         if(remaining>0) { message="この設定では上限を超えています" }
